@@ -2,7 +2,6 @@ package pl.galuszka.mapchecker;
 
 import java.net.URI;
 import java.text.MessageFormat;
-import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -44,36 +43,34 @@ public class PeriodicChecker {
     @PostConstruct
     private void init() {
         restTemplate = new RestTemplate();
-        // sendSimpleMessage("m@galuszka.pl", "Update detected!", "Region " + region);
     }
 
-    @Scheduled(fixedDelay = 4000l)
+    @Scheduled(fixedDelay = 3600000l)
     public void checkForUpdates() {
         try {
             MapData mapData = restTemplate.getForObject(URI.create("https://www.volkswagen.com/content/medialib/vwd4/global/discovercare/files/configuration/_jcr_content/renditions/rendition.file/discovercare.xml"), MapData.class);
 
-            Optional<MapArchiveFile> mapArchiveFileOpt = mapData.getMapArchive()
+            MapArchiveFile mapArchiveFile = mapData.getMapArchive()
                     .stream()
                     .filter(e -> StringUtils.equals(e.getDevice(), device))
                     .filter(e -> StringUtils.equals(e.getMarket(), market))
-                    .findFirst();
+                    .findFirst()
+                    .get();
 
-            if (mapArchiveFileOpt.isPresent()) {
-                MapArchiveFile mapArchiveFile = mapArchiveFileOpt.get();
-                logger.info("mapArchiveFile: {}", mapArchiveFile.toString());
-                File file = mapArchiveFile
-                        .getFiles()
-                        .stream()
-                        .filter(e -> StringUtils.equals(e.getRegionId(), region))
-                        .findFirst()
-                        .get();
-                String md5 = file.getMd5();
-                if (!StringUtils.equals(md5, lastMd5)) {
-                    String message = MessageFormat.format("Version: {0}\nSystemName: {1}\nURL: {2}", mapArchiveFile.getVersion(), mapArchiveFile.getSystemName(), file.getUrl());
-                    sendSimpleMessage("m@galuszka.pl", "New map availiable!", message);
-                }
-            } else {
-                logger.warn("Map Archive not found.");
+            logger.info("mapArchiveFile: {}", mapArchiveFile.toString());
+
+            File file = mapArchiveFile
+                    .getFiles()
+                    .stream()
+                    .filter(e -> StringUtils.equals(e.getRegionId(), region))
+                    .findFirst()
+                    .get();
+
+            String md5 = file.getMd5();
+
+            if (!StringUtils.equals(md5, lastMd5)) {
+                String message = MessageFormat.format("Version: {0}\nSystemName: {1}\nURL: {2}", mapArchiveFile.getVersion(), mapArchiveFile.getSystemName(), file.getUrl());
+                sendSimpleMessage("m@galuszka.pl", "New map availiable!", message);
             }
         } catch (Exception e) {
             logger.error("Exception in checker: ", e);
@@ -81,6 +78,7 @@ public class PeriodicChecker {
     }
 
     public void sendSimpleMessage(String to, String subject, String text) {
+        logger.info("Sending email message to '{}', subject: '{}', body: '{}'", to, subject, text);
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
         message.setTo(to);
