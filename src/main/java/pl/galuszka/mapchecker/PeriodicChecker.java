@@ -73,7 +73,10 @@ public class PeriodicChecker {
                 sendSimpleMessage("m@galuszka.pl", "New map availiable!", message);
             }
         } catch (Exception e) {
-            logger.error("Exception in checker: ", e);
+            if (logger.isDebugEnabled())
+                logger.error("Exception in checker: ", e);
+            else
+                logger.error("Exception in checher: {}, {}", e.getClass().getSimpleName(), e.getMessage());
         }
     }
 
