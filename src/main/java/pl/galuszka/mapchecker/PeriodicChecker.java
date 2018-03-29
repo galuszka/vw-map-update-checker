@@ -44,9 +44,13 @@ public class PeriodicChecker {
     @Value("${mapupdate.url}")
     private String              url;
 
+    @Value("${notify.email}")
+    private String              notifyEmail;
+
     @PostConstruct
     private void init() {
         restTemplate = new RestTemplate();
+        logger.info("Initializing... mail.username: {}", fromEmail);
     }
 
     @Scheduled(fixedDelay = 3600000l)
@@ -83,7 +87,7 @@ public class PeriodicChecker {
 
             if (!StringUtils.equals(md5, lastMd5)) {
                 String message = MessageFormat.format("Version: {0}\nSystemName: {1}\nURL: {2}", mapArchiveFile.getVersion(), mapArchiveFile.getSystemName(), file.getUrl());
-                sendSimpleMessage("m@galuszka.pl", "New map availiable!", message);
+                sendSimpleMessage(notifyEmail, "New map availiable!", message);
             }
         } catch (Exception e) {
             if (logger.isDebugEnabled())
