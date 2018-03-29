@@ -68,7 +68,7 @@ public class PeriodicChecker {
                     .findFirst()
                     .get();
 
-            logger.info("mapArchiveFile: {}", mapArchiveFile.toString());
+            logger.debug("mapArchiveFile: {}", mapArchiveFile.toString());
 
             File file = mapArchiveFile
                     .getFiles()
@@ -78,6 +78,8 @@ public class PeriodicChecker {
                     .get();
 
             String md5 = file.getMd5();
+
+            logger.info("Version: {}, systemName: {}, url: {}, md5: {}", mapArchiveFile.getVersion(), mapArchiveFile.getSystemName(), file.getUrl(), md5);
 
             if (!StringUtils.equals(md5, lastMd5)) {
                 String message = MessageFormat.format("Version: {0}\nSystemName: {1}\nURL: {2}", mapArchiveFile.getVersion(), mapArchiveFile.getSystemName(), file.getUrl());
