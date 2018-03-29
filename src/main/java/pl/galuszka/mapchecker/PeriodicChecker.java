@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,6 +41,9 @@ public class PeriodicChecker {
     @Value("${mapupdate.lastKnownMD5}")
     private String              lastMd5;
 
+    @Value("${mapupdate.url}")
+    private String              url;
+
     @PostConstruct
     private void init() {
         restTemplate = new RestTemplate();
@@ -48,7 +52,14 @@ public class PeriodicChecker {
     @Scheduled(fixedDelay = 3600000l)
     public void checkForUpdates() {
         try {
-            MapData mapData = restTemplate.getForObject(URI.create("https://www.volkswagen.com/content/medialib/vwd4/global/discovercare/files/configuration/_jcr_content/renditions/rendition.file/discovercare.xml"), MapData.class);
+            URI uri = URI.create(url);
+
+            if (logger.isDebugEnabled()) {
+                ResponseEntity<String> responseEntity = restTemplate.getForEntity(uri, String.class);
+                logger.debug(responseEntity.toString());
+            }
+
+            MapData mapData = restTemplate.getForObject(uri, MapData.class);
 
             MapArchiveFile mapArchiveFile = mapData.getMapArchive()
                     .stream()
