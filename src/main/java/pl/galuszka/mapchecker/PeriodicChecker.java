@@ -47,10 +47,13 @@ public class PeriodicChecker {
     @Value("${notify.email}")
     private String              notifyEmail;
 
+    public PeriodicChecker() {
+        restTemplate = new RestTemplate();
+    }
+
     @PostConstruct
     private void init() {
-        restTemplate = new RestTemplate();
-        logger.info("Initializing... mail.username: {}", fromEmail);
+        logger.info("Initializing... spring.mail.username: {}, notify.email: {}", fromEmail, notifyEmail);
     }
 
     @Scheduled(fixedDelay = 3600000l)
