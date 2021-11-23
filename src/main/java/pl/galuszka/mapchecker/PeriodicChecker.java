@@ -53,7 +53,7 @@ public class PeriodicChecker {
 
     @PostConstruct
     private void init() {
-        logger.info("Initializing... spring.mail.username: {}, notify.email: {}", fromEmail, notifyEmail);
+        logger.debug("Initializing... spring.mail.username: {}, notify.email: {}", fromEmail, notifyEmail);
     }
 
     @Scheduled(fixedDelay = 3600000l, initialDelay = 1000)
