@@ -56,7 +56,7 @@ public class PeriodicChecker {
         logger.info("Initializing... spring.mail.username: {}, notify.email: {}", fromEmail, notifyEmail);
     }
 
-    @Scheduled(fixedDelay = 3600000l)
+    @Scheduled(fixedDelay = 3600000l, initialDelay = 1000)
     public void checkForUpdates() {
         try {
             URI uri = URI.create(url);
